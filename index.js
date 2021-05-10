@@ -6,6 +6,96 @@
  * Email: kopchom@oregonstate.edu
  */
  
+ /*================================= Search Functionality =================================*/
+ 
+// Grab the search box
+var searchInput = document.getElementById("navbar-search-input")
+
+// Make a "backup" of the current twits
+var backup = document.querySelectorAll(".twit")
+
+// Search function
+function searchTwits(query) {
+	// Store all existing twits
+	var twits = document.getElementsByClassName("twit")
+	
+	// Track the index as an int
+	var idx = 0
+	
+	// Continue to iterate while the index is in bounds
+	while(twits.item(idx) !== null) {
+		// Convert the text in the current twit to a lowercase string
+		var currentTwitText = twits[idx].innerText.toLowerCase()
+		
+		// If the current twit's text doesn't match the query, remove it
+		if(currentTwitText.search(query) === -1) {
+			twits[idx].remove()
+			/* The proceeding tweets will be moved back to fill the gap,
+			   as such there is no need to increment idx */
+		}
+		// Otherwise, move to the next twit
+		else {
+			idx += 1
+		}
+	}
+	
+}
+
+// Function to clear out all remaining twits
+function clearTwits() {
+	// Store all existing twits
+	var twits = document.getElementsByClassName("twit")
+	
+	// Repeatedly remove the first tweet until there are none left
+	while(twits.item(0) !== null) {
+		twits.item(0).remove()
+	}
+}
+
+// Function to restore an older list of twits
+function restoreTwits(twitsBackup) {
+	// Grab the twit container
+	var twitContainer = document.querySelector("main.twit-container")
+	
+	// Add each twit in twitsBackup to the container
+	for(var i = 0; i < twitsBackup.length; i++) {
+		twitContainer.appendChild(twitsBackup[i])
+	}
+}
+
+// Search behavior for the search bar
+searchInput.addEventListener("input", function(event) {
+	// Reset the tweets (in case a previous search was made)
+	clearTwits()
+	
+	restoreTwits(backup)
+	
+	// Save the user's input as a lowercase string
+	var query = event.currentTarget.value.toLowerCase()
+	
+	searchTwits(query)
+})
+
+//Grab the search button
+var searchButton = document.getElementById("navbar-search-button")
+
+// Search behavior for the search button
+searchButton.addEventListener("click", function() {
+	// Reset the tweets (in case a previous search was made)
+	clearTwits()
+	
+	restoreTwits(backup)
+	
+	// Save the user's input as a lowercase string
+	var query = searchInput.value.toLowerCase()
+	
+	searchTwits(query)
+})
+ 
+ 
+ 
+ /*============================== Create Twit Functionality ==============================*/
+ 
  // Create variables for the modal and the modal's backdrop
  var modalBackdrop = document.getElementById("modal-backdrop")
  
@@ -17,6 +107,11 @@
  twitButton.addEventListener("click", function() {
 	modal.classList.remove("hidden")
 	modalBackdrop.classList.remove("hidden")
+	
+	// Clear the searchbar and restore all tweets
+	searchInput.value = ""
+	clearTwits()
+	restoreTwits(backup)
  })
  
  // Function to hide the modal and clear its data
@@ -102,6 +197,8 @@ function verifyModalContent() {
 		createTwit(modalText.value, modalAuthor.value)
 		// Call the reset function afterwards to "close" and reset the modal
 		resetModal()
+		// Update the backup with the new twit
+		backup = document.querySelectorAll(".twit")
 	}
 }
 
